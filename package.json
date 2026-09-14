@@ -1,0 +1,28 @@
+{
+  "name": "@trackhub/react-native",
+  "version": "0.1.0",
+  "description": "TrackHub attribution, engagement and billing context for React Native",
+  "license": "MIT",
+  "repository": {"type": "git", "url": "https://github.com/Alexander-kuksa/trackhub-react-native.git"},
+  "homepage": "https://github.com/Alexander-kuksa/trackhub-react-native#readme",
+  "bugs": {"url": "https://github.com/Alexander-kuksa/trackhub-react-native/issues"},
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "react-native": "src/index.ts",
+  "files": ["src", "lib", "android", "ios", "example/*.tsx", "TrackHubReactNative.podspec", "react-native.config.js", "README.md", "VALIDATION.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test tests/*.test.cjs",
+    "prepack": "npm run build"
+  },
+  "peerDependencies": {"react": ">=19.2.0", "react-native": ">=0.87.0 <0.88.0"},
+  "devDependencies": {"@types/react": "19.2.3", "react": "19.2.7", "react-native": "0.87.1", "typescript": "5.9.3"},
+  "engines": {"node": ">=22.13.0"},
+  "codegenConfig": {
+    "name": "TrackHubReactNativeSpec",
+    "type": "modules",
+    "jsSrcsDir": "src/specs",
+    "android": {"javaPackageName": "com.trackhub.reactnative"},
+    "ios": {"modulesProvider": {"NativeTrackHub": "RCTTrackHub"}}
+  }
+}

@@ -1,0 +1,25 @@
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'com.facebook.react'
+
+android {
+    namespace 'com.trackhub.reactnative'
+    compileSdkVersion rootProject.ext.has('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 36
+    defaultConfig { minSdkVersion 26 }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions { jvmTarget = '17' }
+}
+
+react {
+    jsRootDir = file('../src')
+    libraryName = 'TrackHubReactNativeSpec'
+    codegenJavaPackageName = 'com.trackhub.reactnative'
+}
+
+dependencies {
+    implementation 'com.facebook.react:react-android'
+    implementation 'com.github.Alexander-kuksa:trackhub-android:3.0.8'
+}
