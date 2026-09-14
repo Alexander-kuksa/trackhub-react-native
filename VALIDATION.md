@@ -1,4 +1,23 @@
-# Validation — React Native wrapper 0.1.1
+# Validation — Daively React Native wrapper
+
+## npm packaging release 0.1.2 — 14 September 2026
+
+The public package is now `@daively/react-native`. The 0.1.2 release changes
+package identity, examples, developer documentation and reported wrapper version;
+the adapter methods, Codegen module identity and exact native SDK pins are unchanged.
+Remove `@trackhub/react-native` before installing the new package to avoid duplicate
+native autolinking. Native builds below are historical 0.1.1 evidence, not claims
+that the renamed package was already rebuilt on a device.
+
+For the current package, run `npm test`, `npm run codegen:check` and `npm pack`.
+Local 0.1.2 verification passed **31/31 package tests**, TypeScript compilation
+and actual Android/iOS Codegen on React Native **0.85.3**. Publication also requires
+inspection of the final tarball and a clean consumer installation under the new scope.
+Install the resulting `daively-react-native-0.1.2.tgz` into a clean RN 0.85.3 host
+and verify that CLI autolinking lists only `@daively/react-native` with the
+`TrackHubReactNative` pod and Android module. Use the current examples (which import
+`Daively`) and expect wrapper `0.1.2` after rebuilding the native app. The older
+version-specific evidence and reproduction instructions are retained below.
 
 ## React Native 0.85.3 compatibility — 14 September 2026
 

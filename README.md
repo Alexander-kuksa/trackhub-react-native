@@ -1,6 +1,6 @@
-# TrackHub for React Native
+# Daively for React Native
 
-Version **0.1.1** requires exactly **iOS 3.1.4** and **Android 3.0.8**.
+Version **0.1.2** requires exactly **iOS 3.1.4** and **Android 3.0.8**.
 The TypeScript API uses a Codegen TurboModule. Native SDKs own installation
 identity, signatures, session lifecycle, durable queues, consent, retries,
 Play Install Referrer, Apple attribution and erasure. No billing SDK is imported.
@@ -16,17 +16,38 @@ in the peer range. Keep React compatible with your RN release (19.2.3 in the
 
 ## Install
 
-Install the `0.1.1` GitHub Release tarball. This package is distributed
-through GitHub Releases, not the public npm registry; do not assume
-that `npm install @trackhub/react-native` resolves this release.
+Install the exact public npm package:
 
 ```sh
-npm install https://github.com/Alexander-kuksa/trackhub-react-native/releases/download/0.1.1/trackhub-react-native-0.1.1.tgz
+npm install --save-exact @daively/react-native@0.1.2
 ```
 
+Package: [@daively/react-native](https://www.npmjs.com/package/@daively/react-native).
+The identical archive is also available on [GitHub Releases](https://github.com/Alexander-kuksa/trackhub-react-native/releases/tag/0.1.2):
+
+```sh
+npm install --save-exact https://github.com/Alexander-kuksa/trackhub-react-native/releases/download/0.1.2/daively-react-native-0.1.2.tgz
+```
+
+### Upgrade from the earlier GitHub-only package
+
+Remove the old package first so React Native cannot autolink two copies of the
+same native module, then install the new name and update all JS/TS imports:
+
+```sh
+npm uninstall @trackhub/react-native
+npm install --save-exact @daively/react-native@0.1.2
+```
+
+Use `import Daively from '@daively/react-native'`. The default import name is
+your choice; the methods are unchanged. Reinstall iOS Pods and rebuild both
+native apps; a Metro reload or OTA JavaScript update is not sufficient.
+Daively is the product name. Existing repository URLs, native `TrackHub` symbols,
+the `TrackHubReactNative` pod and Codegen module names remain stable for compatibility.
+
 For local artifact validation, install the supplied tarball with
-`npm install /path/to/trackhub-react-native-0.1.1.tgz`. Both installation methods
-use the same `@trackhub/react-native` import shown below. Commit your package
+`npm install /path/to/daively-react-native-0.1.2.tgz`. Both installation methods
+use the same `@daively/react-native` import shown below. Commit your package
 manager lockfile. The wrapper archive does not bundle the native SDK binaries:
 a clean application build must also resolve exactly iOS **3.1.4** and Android
 **3.0.8** from the native dependency sources below. A host-app canary must
@@ -39,7 +60,7 @@ and set the application's minimum SDK to 26. The package pins
 Keep the toolchain from your exact React Native template. React Native 0.85.3
 uses Gradle 9.3.1, AGP 8.12.0, Kotlin 2.1.20 and compile SDK 36; no AGP 9
 opt-outs are needed. For React Native 0.87, retain that template's AGP 9
-Kotlin/DSL compatibility properties. Both require the TrackHub minimum SDK 26.
+Kotlin/DSL compatibility properties. Both require the Daively minimum SDK 26.
 
 iOS: enable `use_frameworks! :linkage => :dynamic` in your Podfile (or use the
 standard template's `USE_FRAMEWORKS=dynamic bundle exec pod install`), then
@@ -49,11 +70,11 @@ Keep the standard `react_native_post_install` hook: React Native's
 `spm_dependency` support attaches the exact TrackHub Swift package and its
 `TrackHub`/`TrackHubGoogleODM` products. Commit `Podfile.lock` and
 `Package.resolved`. Configure the Apple attribution Info.plist entries using
-your app's TrackHub Setup instructions. Add `NSUserTrackingUsageDescription`
+your app's Daively Setup instructions. Add `NSUserTrackingUsageDescription`
 before explicitly requesting ATT. Neither the wrapper nor start displays ATT
 or notification permission dialogs automatically.
 
-Avoid also embedding a different copy/version of the native TrackHub SDK.
+Avoid also embedding a different copy/version of the native Daively SDK.
 Firebase can coexist; use the same billing identity provider and avoid double
 reporting product events if importing them from Firebase.
 
@@ -63,18 +84,18 @@ Register callbacks before start. SDK Key is app-specific; never log it.
 Use actual CMP results in place of these `unknown` examples.
 
 ```ts
-import TrackHub from '@trackhub/react-native';
+import Daively from '@daively/react-native';
 
-const failures = TrackHub.onDeliveryFailure(failure => {
+const failures = Daively.onDeliveryFailure(failure => {
   // Final credentialsRejected after clock recovery. Update the SDK Key and
   // restart the app; do not spin in a start() retry loop.
   showIntegrationError(failure.type);
 });
-const attribution = TrackHub.onAttributionChanged(value => {
+const attribution = Daively.onAttributionChanged(value => {
   updateAcquisitionUI(value.network);
 });
 
-await TrackHub.start({
+await Daively.start({
   sdkKey: APP_TRACKHUB_SDK_KEY,
   googleAdsConsent: {adUserData: 'unknown', adPersonalization: 'unknown'},
   // Separate destination-specific CMP/policy result. Unknown blocks OpenAI delivery.
@@ -91,11 +112,11 @@ await TrackHub.start({
   onLinkError: error => reportIntegrationWarning(error.message), // redacted; never log URLs
 });
 
-await TrackHub.setExternalIdentity('apphud', actualApphudUserId);
-await TrackHub.trackOnboardingShown({deduplicationId: 'onboarding-v1'});
-await TrackHub.trackPaywallShown('onboarding_placement');
-await TrackHub.trackPurchaseCtaTapped('inapp_placement');
-await TrackHub.trackEvent('generation_finished', {
+await Daively.setExternalIdentity('apphud', actualApphudUserId);
+await Daively.trackOnboardingShown({deduplicationId: 'onboarding-v1'});
+await Daively.trackPaywallShown('onboarding_placement');
+await Daively.trackPurchaseCtaTapped('inapp_placement');
+await Daively.trackEvent('generation_finished', {
   callbackParams: {model: 'flux', duration_ms: 850},
   deduplicationId: generationId,
 });
@@ -141,10 +162,10 @@ in the host app and wire React Native's native Linking handlers.
 
 // Alternative when navigation already owns Linking:
 // Obtain the original initial URL in your app bootstrap/navigation entry point.
-if (originalInitialUrl) await TrackHub.handleDeepLink(originalInitialUrl);
-await TrackHub.start(config, {linking: 'manual'});
+if (originalInitialUrl) await Daively.handleDeepLink(originalInitialUrl);
+await Daively.start(config, {linking: 'manual'});
 // In that same navigation owner's warm URL callback, forward each URL once:
-await TrackHub.handleDeepLink(originalWarmUrl);
+await Daively.handleDeepLink(originalWarmUrl);
 ```
 
 Automatic and manual forwarding are alternative ownership choices. Do not have
@@ -159,7 +180,7 @@ initialization** if capture must be guaranteed before the JS runtime starts,
 and use a single manual owner rather than forwarding it again in JS. Configure
 the host's native URL handlers; the npm package cannot configure your schemes,
 Associated Domains, intent filters or ad destinations. Android Play Install Referrer is captured by the native SDK
-independently of JavaScript Linking. Use the TrackHub measurement URL as the ad
+independently of JavaScript Linking. Use the Daively measurement URL as the ad
 destination so the server carries `oppref` into the Google Play referrer.
 
 `oppref` is the OpenAI click reference. Google uses its own Google/ODM attribution
@@ -178,7 +199,7 @@ view-through or probabilistic matching mechanism.
 path or null. iOS 3.1.4 returns null for deferred resolution; it does not perform
 probabilistic App Store matching. Android uses the install-referrer capability.
 The host validates the path against its navigation routes before
-opening it. TrackHub does not automatically navigate or open arbitrary URLs.
+opening it. Daively does not automatically navigate or open arbitrary URLs.
 
 `getAttribution(timeoutMs?)` and `resolveDeferredDeepLink(timeoutMs?)` reject
 with `E_TRACKHUB_TIMEOUT` after 15 seconds by default (override: 1–120000 ms).
@@ -214,10 +235,10 @@ navigation to one handler. An attribution/deferred lookup never blocks app start
 - `setExternalIdentity(provider, null)`: clears that billing provider's binding.
 
 ```ts
-const erasure = TrackHub.onErasureCompleted(confirmed => {
+const erasure = Daively.onErasureCompleted(confirmed => {
   updateErasureStatus(confirmed);
 });
-await TrackHub.gdprForgetMe();
+await Daively.gdprForgetMe();
 // Local measurement stop/erasure request has been dispatched. The server may
 // confirm later after retry; no network wait is required to stop tracking.
 ```
@@ -231,9 +252,9 @@ confirmation events as process-local notifications, not durable receipts.
 ## Platform setup for the developer and marketer
 
 All OpenAI CAPI keys, Google Link IDs/credentials and advertiser reporting API
-keys stay in TrackHub server settings. Never ship them in JS, native config,
+keys stay in Daively server settings. Never ship them in JS, native config,
 `.env` files included in an app build, or `callbackParams`/`partnerParams`.
-The app-specific SDK Key is the only TrackHub bootstrap credential in the app.
+The app-specific SDK Key is the only Daively bootstrap credential in the app.
 
 | Destination | Developer setup | Marketer/platform setup |
 | --- | --- | --- |
@@ -249,7 +270,7 @@ native wait interval, request ATT once from the host at the appropriate UX
 point, and send actual consent updates. Waiting intervals are upper bounds,
 not a requirement that the user leave the application open for that duration.
 
-Choose **exactly one** Apple conversion-value writer: `active` when TrackHub
+Choose **exactly one** Apple conversion-value writer: `active` when Daively
 owns it; `passive` when AppsFlyer/Adjust/Singular or another owner writes Apple
 values. Passive does not disable normal SDK events or server measurement.
 Copy the Apple postback endpoint plist snippet from the specific app's Setup;

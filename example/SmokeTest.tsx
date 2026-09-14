@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {Platform, ScrollView, Text, TurboModuleRegistry, type TurboModule} from 'react-native';
-import TrackHub from '@trackhub/react-native';
+import Daively from '@daively/react-native';
 
 // Isolated fresh-app smoke test. Does not initialize measurement, prompt for
-// consent, contact TrackHub or erase data. The private port tests native guards.
+// consent, contact Daively or erase data. The private port tests native guards.
 interface TestPort extends TurboModule {
   invoke(operation: string, payload: string): Promise<string>;
 }
@@ -14,37 +14,37 @@ export default function SmokeTest() {
     let mounted = true;
     async function run() {
       const native = TurboModuleRegistry.getEnforcing<TestPort>('NativeTrackHub');
-      const versions = await TrackHub.getVersions();
+      const versions = await Daively.getVersions();
       const expected = Platform.OS === 'ios' ? '3.1.4' : '3.0.8';
-      if (versions.native !== expected || versions.reactNative !== '0.1.1' || versions.platform !== Platform.OS) {
+      if (versions.native !== expected || versions.reactNative !== '0.1.2' || versions.platform !== Platform.OS) {
         throw new Error('Unexpected native versions');
       }
-      const subscription = TrackHub.onDeferredDeepLink(() => {});
+      const subscription = Daively.onDeferredDeepLink(() => {});
       subscription.remove();
       // Unknown is not a measurement grant. Exercise the new native API without starting it.
-      await TrackHub.updateOpenAiAdsConsent({measurement: 'unknown', userData: 'denied', personalization: 'unknown'});
-      if (await TrackHub.getAttribution() !== null) throw new Error('Expected fresh-install attribution');
+      await Daively.updateOpenAiAdsConsent({measurement: 'unknown', userData: 'denied', personalization: 'unknown'});
+      if (await Daively.getAttribution() !== null) throw new Error('Expected fresh-install attribution');
       if (Platform.OS === 'ios') {
         let finishEvent!: (value: string | null) => void;
         const event = new Promise<string | null>(resolve => {finishEvent = resolve;});
-        const events = TrackHub.onDeferredDeepLink(finishEvent);
+        const events = Daively.onDeferredDeepLink(finishEvent);
         let timer: ReturnType<typeof setTimeout> | undefined;
         try {
           const values = await Promise.race([
-            Promise.all([TrackHub.resolveDeferredDeepLink(), event]),
+            Promise.all([Daively.resolveDeferredDeepLink(), event]),
             new Promise<never>((_resolve, reject) => {
               timer = setTimeout(() => reject(new Error('Native event was not delivered')), 3000);
             }),
           ]);
           if (values.some(value => value !== null)) throw new Error('Expected no deferred link');
         } finally {events.remove(); if (timer !== undefined) clearTimeout(timer);}
-        if (await TrackHub.handleAdAttributionReengagement('flux://smoke') !== null) {
+        if (await Daively.handleAdAttributionReengagement('flux://smoke') !== null) {
           throw new Error('Expected no Apple reengagement tag');
         }
       } else {
         // Android's native resolver waits for initialized install context.
         let timedOut = false;
-        try {await TrackHub.resolveDeferredDeepLink(200);} catch (error) {
+        try {await Daively.resolveDeferredDeepLink(200);} catch (error) {
           timedOut = (error as {code?: string}).code === 'E_TRACKHUB_TIMEOUT';
         }
         if (!timedOut) throw new Error('Expected bounded lookup before native start');
@@ -65,12 +65,12 @@ export default function SmokeTest() {
         }
         if (!rejected) throw new Error('Native input guard did not reject');
       }
-      if (Platform.OS === 'android' && await TrackHub.requestAppTrackingTransparency() !== 'unavailable') {
+      if (Platform.OS === 'android' && await Daively.requestAppTrackingTransparency() !== 'unavailable') {
         throw new Error('Android ATT must be unavailable');
       }
       if (Platform.OS === 'android') {
         let unsupported = false;
-        try {await TrackHub.handleAdAttributionReengagement('flux://smoke');} catch (error) {
+        try {await Daively.handleAdAttributionReengagement('flux://smoke');} catch (error) {
           unsupported = (error as {code?: string}).code === 'E_UNSUPPORTED_PLATFORM';
         }
         if (!unsupported) throw new Error('Apple-only API must reject on Android');

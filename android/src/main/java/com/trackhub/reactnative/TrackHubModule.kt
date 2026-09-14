@@ -100,7 +100,7 @@ class TrackHubModule(context: ReactApplicationContext) : NativeTrackHubSpec(cont
                     promise.reject("E_UNSUPPORTED_PLATFORM", "This API is available on iOS only."); return
                 }
                 "getVersions" -> {
-                    promise.resolve(JSONObject().put("reactNative", "0.1.1").put("native", TrackHub.SDK_VERSION).put("platform", "android").toString())
+                    promise.resolve(JSONObject().put("reactNative", "0.1.2").put("native", TrackHub.SDK_VERSION).put("platform", "android").toString())
                     return
                 }
                 else -> { promise.reject("E_TRACKHUB_OPERATION", "Unsupported TrackHub operation."); return }
