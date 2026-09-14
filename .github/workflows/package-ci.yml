@@ -9,6 +9,9 @@ permissions:
 jobs:
   package:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        react-native: ['0.85.3', '0.87.1']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -16,10 +19,12 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci --ignore-scripts
+      - run: npm install --no-save --package-lock=false --ignore-scripts react-native@${{ matrix.react-native }}
       - run: npm test
+      - run: npm run codegen:check
       - run: npm pack
       - uses: actions/upload-artifact@v4
         with:
-          name: trackhub-react-native-package
+          name: trackhub-react-native-package-rn-${{ matrix.react-native }}
           path: '*.tgz'
           if-no-files-found: error

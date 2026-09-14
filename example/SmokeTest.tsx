@@ -16,7 +16,7 @@ export default function SmokeTest() {
       const native = TurboModuleRegistry.getEnforcing<TestPort>('NativeTrackHub');
       const versions = await TrackHub.getVersions();
       const expected = Platform.OS === 'ios' ? '3.1.4' : '3.0.8';
-      if (versions.native !== expected || versions.reactNative !== '0.1.0' || versions.platform !== Platform.OS) {
+      if (versions.native !== expected || versions.reactNative !== '0.1.1' || versions.platform !== Platform.OS) {
         throw new Error('Unexpected native versions');
       }
       const subscription = TrackHub.onDeferredDeepLink(() => {});

@@ -1,4 +1,62 @@
-# Validation — React Native 0.1.0
+# Validation — React Native wrapper 0.1.1
+
+## React Native 0.85.3 compatibility — 14 September 2026
+
+The 0.1.1 candidate was installed as a tarball into separate clean Community
+CLI apps using **React Native 0.85.3**, **React 19.2.3**, Hermes and the New
+Architecture. Installation passed without `--force` or `--legacy-peer-deps`.
+Native dependencies resolved from their public sources with no local overrides:
+**iOS TrackHub 3.1.4**, **Google ODM 3.7.0**, **Android TrackHub 3.0.8**.
+The iOS TrackHub SPM lock resolved 3.1.4 to
+`6207742380af865e0af76de28b5f3956f5900e11`.
+
+| Platform | Actual host configuration | Result |
+| --- | --- | --- |
+| Android | JDK 17.0.20, Gradle 9.3.1, AGP 8.12.0, Kotlin 2.1.20; compile/target SDK 36, minimum 26; arm64 debug APK | Full host build passed; native smoke PASS on Android API 34 emulator, native 3.0.8 / wrapper 0.1.1 |
+| iOS | Xcode 26.6, CocoaPods 1.16.2, dynamic frameworks; deployment target 15.1; arm64 + x86_64 simulator | Full workspace build passed; native smoke PASS on iPhone 17 Pro / iOS 26.5, native 3.1.4 / wrapper 0.1.1 |
+
+Both hosts passed TypeScript checks, CLI autolinking and their real native
+Codegen/build steps. The smoke app used an embedded JS bundle to avoid a
+different React Native version's Metro server. It exercises native
+registration, promises, nullable snapshots, subscriptions, separate OpenAI
+consent, input guards, timeouts and error redaction. It does not start
+measurement, send TrackHub requests or prove paid-ad attribution.
+
+Package verification: **29/29 tests** and TypeScript compilation passed on
+both RN **0.85.3** and **0.87.1**. `npm run codegen:check` generated and checked
+the actual Android Java and iOS Objective-C++ TurboModule bindings on both
+versions. CI now runs that same two-version matrix; it does not run native
+host builds. `npm pack` and `git diff --check` passed. The previous 0.87.1
+native build/runtime evidence below is for wrapper 0.1.0; native host builds
+of wrapper 0.1.1 were repeated on the requested 0.85.3.
+
+No adapter API changes were necessary. This patch adds exact 0.85.3 to the
+peer range, pins development to 0.85.3, and synchronizes wrapper version
+reporting to 0.1.1; native SDK pins and measurement behavior are unchanged.
+The peer range remains conservative: `0.85.3 || >=0.87.0 <0.88.0`.
+Other 0.85 patches, 0.86.x, Legacy Architecture, Expo prebuild, static Pods,
+physical-device/store-signed builds and live ad-provider delivery are not
+certified by these checks. Dynamic frameworks are still required on iOS.
+
+### Reproduce the 0.85.3 checks
+
+1. In this package: `npm ci`, `npm test`, `npm run codegen:check`, `npm pack`.
+2. Create a fresh app with
+   `npx @react-native-community/cli@20.1.0 init TrackHubSmoke --version 0.85.3`,
+   then install the local `trackhub-react-native-0.1.1.tgz` without peer overrides.
+3. Replace `App.tsx` with `example/SmokeTest.tsx`; run `npx tsc --noEmit`.
+4. Android: add JitPack and raise the template's `minSdkVersion` to 26.
+   Preserve its Gradle/AGP/Kotlin versions; AGP 9 opt-outs are not required.
+   In `android`, run
+   `./gradlew :app:assembleDebug -PreactNativeArchitectures=arm64-v8a`.
+5. iOS: run `USE_FRAMEWORKS=dynamic bundle exec pod install`, preserving the
+   standard `react_native_post_install` hook, and build the `.xcworkspace`
+   for an iOS simulator. Keep the exact SPM resolution and dynamic linkage.
+6. Start this host's own Metro server, or embed its bundle and disable dev-server
+   loading in this isolated smoke host. Launch fresh test installations and
+   expect `PASS`, wrapper `0.1.1`, and the pinned native versions above.
+
+## Previous wrapper 0.1.0 validation (retained release evidence)
 
 Release-candidate validation on 14 September 2026 used iOS TrackHub **3.1.4**,
 Google ODM **3.7.0**, and Android TrackHub **3.0.8**. Both native adapters were

@@ -1,6 +1,6 @@
 {
   "name": "@trackhub/react-native",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TrackHub attribution, engagement and billing context for React Native",
   "license": "MIT",
   "repository": {"type": "git", "url": "https://github.com/Alexander-kuksa/trackhub-react-native.git"},
@@ -13,10 +13,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "npm run build && node --test tests/*.test.cjs",
+    "codegen:check": "node tests/codegen-check.cjs",
     "prepack": "npm run build"
   },
-  "peerDependencies": {"react": ">=19.2.0", "react-native": ">=0.87.0 <0.88.0"},
-  "devDependencies": {"@types/react": "19.2.3", "react": "19.2.7", "react-native": "0.87.1", "typescript": "5.9.3"},
+  "peerDependencies": {"react": "^19.2.3", "react-native": "0.85.3 || >=0.87.0 <0.88.0"},
+  "devDependencies": {"@types/react": "19.2.3", "react": "19.2.7", "react-native": "0.85.3", "typescript": "5.9.3"},
   "engines": {"node": ">=22.13.0"},
   "codegenConfig": {
     "name": "TrackHubReactNativeSpec",

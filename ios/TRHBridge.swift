@@ -127,7 +127,7 @@ public final class TRHBridge: NSObject {
                 case "gdprForgetMe":
                     TrackHub.gdprForgetMe(reason: try required(p, "reason")) { [weak self] in self?.event("erasureCompleted", $0) }
                 case "getVersions":
-                    resolve(try encode(["reactNative": "0.1.0", "native": TrackHub.sdkVersion, "platform": "ios"])); return
+                    resolve(try encode(["reactNative": "0.1.1", "native": TrackHub.sdkVersion, "platform": "ios"])); return
                 default: reject("E_TRACKHUB_OPERATION", "Unsupported TrackHub operation."); return
                 }
                 resolve("null")

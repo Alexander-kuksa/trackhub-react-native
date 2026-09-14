@@ -1,38 +1,45 @@
 # TrackHub for React Native
 
-Version **0.1.0** requires exactly **iOS 3.1.4** and **Android 3.0.8**.
+Version **0.1.1** requires exactly **iOS 3.1.4** and **Android 3.0.8**.
 The TypeScript API uses a Codegen TurboModule. Native SDKs own installation
 identity, signatures, session lifecycle, durable queues, consent, retries,
 Play Install Referrer, Apple attribution and erasure. No billing SDK is imported.
 
-This initial package targets **React Native 0.87.x, New Architecture**;
+This package targets **React Native 0.85.3 and 0.87.x, New Architecture**;
 minimum iOS 15.1 and Android API 26. Use the React Native template's JDK,
 Gradle and Android SDK versions. Expo requires a native development/production
 build with the native configuration below; Expo Go and web are unsupported.
-Older React Native versions have not been certified.
+React Native 0.85.3 is the exact supported 0.85 patch; other 0.85 patches,
+0.86.x and versions below 0.85.3 have not been certified and are not included
+in the peer range. Keep React compatible with your RN release (19.2.3 in the
+0.85.3 template). Legacy Architecture is unsupported.
 
 ## Install
 
-Install the `0.1.0` GitHub Release tarball. This package is distributed
+Install the `0.1.1` GitHub Release tarball. This package is distributed
 through GitHub Releases, not the public npm registry; do not assume
 that `npm install @trackhub/react-native` resolves this release.
 
 ```sh
-npm install https://github.com/Alexander-kuksa/trackhub-react-native/releases/download/0.1.0/trackhub-react-native-0.1.0.tgz
+npm install https://github.com/Alexander-kuksa/trackhub-react-native/releases/download/0.1.1/trackhub-react-native-0.1.1.tgz
 ```
 
 For local artifact validation, install the supplied tarball with
-`npm install /path/to/trackhub-react-native-0.1.0.tgz`. Both installation methods
+`npm install /path/to/trackhub-react-native-0.1.1.tgz`. Both installation methods
 use the same `@trackhub/react-native` import shown below. Commit your package
 manager lockfile. The wrapper archive does not bundle the native SDK binaries:
 a clean application build must also resolve exactly iOS **3.1.4** and Android
-**3.0.8** from the native dependency sources below. The matching server migration
-and production rollout remain a separate release gate for OpenAI delivery.
+**3.0.8** from the native dependency sources below. A host-app canary must
+verify signed delivery and the running server's destination/consent behavior
+before enabling live OpenAI delivery; a wrapper build alone does not prove it.
 
 Android: add `maven { url "https://jitpack.io" }` to your dependency repositories
 and set the application's minimum SDK to 26. The package pins
 `com.github.Alexander-kuksa:trackhub-android:3.0.8` and autolinks its module.
-Keep the React Native 0.87 template's AGP 9 Kotlin/DSL compatibility properties.
+Keep the toolchain from your exact React Native template. React Native 0.85.3
+uses Gradle 9.3.1, AGP 8.12.0, Kotlin 2.1.20 and compile SDK 36; no AGP 9
+opt-outs are needed. For React Native 0.87, retain that template's AGP 9
+Kotlin/DSL compatibility properties. Both require the TrackHub minimum SDK 26.
 
 iOS: enable `use_frameworks! :linkage => :dynamic` in your Podfile (or use the
 standard template's `USE_FRAMEWORKS=dynamic bundle exec pod install`), then
@@ -270,11 +277,15 @@ and [supported events](https://developers.openai.com/ads/supported-events).
 ```sh
 npm install
 npm test
+npm run codegen:check
 npm pack
 ```
 
-`example/App.tsx` can replace App.tsx in a new React Native 0.87 app after
+`example/App.tsx` can replace App.tsx in a new React Native 0.85.3 or 0.87 app after
 installing the tarball. See `VALIDATION.md` for performed build checks and limits.
+The development lockfile pins RN 0.85.3; CI runs TypeScript, unit/package tests
+and actual Android/iOS Codegen with both RN 0.85.3 and 0.87.1. CI Codegen is
+not a substitute for the native host builds documented in `VALIDATION.md`.
 The private JSON bridge never includes raw arguments in error messages.
 
 Architecture references: [React Native TurboModules](https://reactnative.dev/docs/turbo-native-modules-introduction),
