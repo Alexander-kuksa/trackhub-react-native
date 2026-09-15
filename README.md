@@ -16,27 +16,31 @@ in the peer range. Keep React compatible with your RN release (19.2.3 in the
 
 ## Install
 
-Install the exact public npm package:
-
-```sh
-npm install --save-exact @daively/react-native@0.1.2
-```
-
-Package: [@daively/react-native](https://www.npmjs.com/package/@daively/react-native).
-The identical archive is also available on [GitHub Releases](https://github.com/Alexander-kuksa/trackhub-react-native/releases/tag/0.1.2):
+Install the versioned archive from [GitHub Releases](https://github.com/Alexander-kuksa/trackhub-react-native/releases/tag/0.1.2).
+The package inside the archive is `@daively/react-native` version `0.1.2`.
+It is **not published to the npm registry** as of 15 September 2026; the registry
+returns HTTP 404. Use the full archive URL, not a package-name registry install:
 
 ```sh
 npm install --save-exact https://github.com/Alexander-kuksa/trackhub-react-native/releases/download/0.1.2/daively-react-native-0.1.2.tgz
 ```
 
-### Upgrade from the earlier GitHub-only package
+After npm publication is verified, the registry install command will be:
+
+```sh
+npm install --save-exact @daively/react-native@0.1.2
+```
+
+Until publication succeeds, use the working GitHub archive command above.
+
+### Upgrade from the earlier package
 
 Remove the old package first so React Native cannot autolink two copies of the
 same native module, then install the new name and update all JS/TS imports:
 
 ```sh
 npm uninstall @trackhub/react-native
-npm install --save-exact @daively/react-native@0.1.2
+npm install --save-exact https://github.com/Alexander-kuksa/trackhub-react-native/releases/download/0.1.2/daively-react-native-0.1.2.tgz
 ```
 
 Use `import Daively from '@daively/react-native'`. The default import name is
@@ -46,7 +50,7 @@ Daively is the product name. Existing repository URLs, native `TrackHub` symbols
 the `TrackHubReactNative` pod and Codegen module names remain stable for compatibility.
 
 For local artifact validation, install the supplied tarball with
-`npm install /path/to/daively-react-native-0.1.2.tgz`. Both installation methods
+`npm install /path/to/daively-react-native-0.1.2.tgz`. Remote and local archive installs
 use the same `@daively/react-native` import shown below. Commit your package
 manager lockfile. The wrapper archive does not bundle the native SDK binaries:
 a clean application build must also resolve exactly iOS **3.1.4** and Android
