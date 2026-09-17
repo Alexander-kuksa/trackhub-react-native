@@ -31,7 +31,7 @@ public final class TRHBridge: NSObject {
                 reject("E_TRACKHUB_UNAVAILABLE", "Native module has been invalidated."); return
             }
             do {
-                guard let data = payload.data(using: .utf8), data.count <= 262144,
+                guard boundedBridgePayload(payload), let data = payload.data(using: .utf8),
                       let p = try JSONSerialization.jsonObject(with: data) as? [String: Any] else { throw Input.invalid }
                 switch operation {
                 case "start":
@@ -127,7 +127,7 @@ public final class TRHBridge: NSObject {
                 case "gdprForgetMe":
                     TrackHub.gdprForgetMe(reason: try required(p, "reason")) { [weak self] in self?.event("erasureCompleted", $0) }
                 case "getVersions":
-                    resolve(try encode(["reactNative": "0.1.2", "native": TrackHub.sdkVersion, "platform": "ios"])); return
+                    resolve(try encode(["reactNative": "0.1.3", "native": TrackHub.sdkVersion, "platform": "ios"])); return
                 default: reject("E_TRACKHUB_OPERATION", "Unsupported TrackHub operation."); return
                 }
                 resolve("null")
@@ -139,6 +139,27 @@ public final class TRHBridge: NSObject {
 }
 
 private enum Input: Error { case invalid }
+private func boundedBridgePayload(_ raw: String) -> Bool {
+    guard raw.utf8.count <= 262144 else { return false }
+    var depth = 0
+    var quoted = false
+    var escaped = false
+    for byte in raw.utf8 {
+        if quoted {
+            if escaped { escaped = false }
+            else if byte == 92 { escaped = true }
+            else if byte == 34 { quoted = false }
+        } else {
+            switch byte {
+            case 34: quoted = true
+            case 91, 123: depth += 1; if depth > 32 { return false }
+            case 93, 125: depth -= 1; if depth < 0 { return false }
+            default: break
+            }
+        }
+    }
+    return !quoted && depth == 0
+}
 private func text(_ p: [String: Any], _ key: String) throws -> String? {
     guard let value = p[key], !(value is NSNull) else { return nil }
     guard let value = value as? String else { throw Input.invalid }

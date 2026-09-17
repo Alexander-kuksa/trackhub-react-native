@@ -1,6 +1,6 @@
 # Daively for React Native
 
-Version **0.1.2** requires exactly **iOS 3.1.4** and **Android 3.0.8**.
+Version **0.1.3** requires exactly **iOS 3.1.4** and **Android 3.0.9**.
 The TypeScript API uses a Codegen TurboModule. Native SDKs own installation
 identity, signatures, session lifecycle, durable queues, consent, retries,
 Play Install Referrer, Apple attribution and erasure. No billing SDK is imported.
@@ -14,21 +14,25 @@ React Native 0.85.3 is the exact supported 0.85 patch; other 0.85 patches,
 in the peer range. Keep React compatible with your RN release (19.2.3 in the
 0.85.3 template). Legacy Architecture is unsupported.
 
+Version 0.1.3 includes Android first-install ordering, durable late Firebase
+identity updates, and payload/storage bounds from native SDK 3.0.9. The wrapper
+also bounds JSON data and offers optional callback error containment on both
+platforms. The exact iOS SDK dependency remains 3.1.4.
+
 ## Install
 
 Install the exact public npm package
-[@daively/react-native](https://www.npmjs.com/package/@daively/react-native/v/0.1.2).
-Anonymous registry installation was verified on 15 September 2026:
+[@daively/react-native](https://www.npmjs.com/package/@daively/react-native/v/0.1.3).
 
 ```sh
-npm install --save-exact @daively/react-native@0.1.2
+npm install --save-exact @daively/react-native@0.1.3
 ```
 
 The byte-identical archive is also available on
-[GitHub Releases](https://github.com/Alexander-kuksa/trackhub-react-native/releases/tag/0.1.2):
+[GitHub Releases](https://github.com/Alexander-kuksa/trackhub-react-native/releases/tag/0.1.3):
 
 ```sh
-npm install --save-exact https://github.com/Alexander-kuksa/trackhub-react-native/releases/download/0.1.2/daively-react-native-0.1.2.tgz
+npm install --save-exact https://github.com/Alexander-kuksa/trackhub-react-native/releases/download/0.1.3/daively-react-native-0.1.3.tgz
 ```
 
 ### Upgrade from the earlier package
@@ -38,7 +42,7 @@ same native module, then install the new name and update all JS/TS imports:
 
 ```sh
 npm uninstall @trackhub/react-native
-npm install --save-exact @daively/react-native@0.1.2
+npm install --save-exact @daively/react-native@0.1.3
 ```
 
 Use `import Daively from '@daively/react-native'`. The default import name is
@@ -48,17 +52,17 @@ Daively is the product name. Existing repository URLs, native `TrackHub` symbols
 the `TrackHubReactNative` pod and Codegen module names remain stable for compatibility.
 
 For local artifact validation, install the supplied tarball with
-`npm install /path/to/daively-react-native-0.1.2.tgz`. Registry and archive installs
+`npm install /path/to/daively-react-native-0.1.3.tgz`. Registry and archive installs
 use the same `@daively/react-native` import shown below. Commit your package
 manager lockfile. The wrapper archive does not bundle the native SDK binaries:
 a clean application build must also resolve exactly iOS **3.1.4** and Android
-**3.0.8** from the native dependency sources below. A host-app canary must
+**3.0.9** from the native dependency sources below. A host-app canary must
 verify signed delivery and the running server's destination/consent behavior
 before enabling live OpenAI delivery; a wrapper build alone does not prove it.
 
 Android: add `maven { url "https://jitpack.io" }` to your dependency repositories
 and set the application's minimum SDK to 26. The package pins
-`com.github.Alexander-kuksa:trackhub-android:3.0.8` and autolinks its module.
+`com.github.Alexander-kuksa:trackhub-android:3.0.9` and autolinks its module.
 Keep the toolchain from your exact React Native template. React Native 0.85.3
 uses Gradle 9.3.1, AGP 8.12.0, Kotlin 2.1.20 and compile SDK 36; no AGP 9
 opt-outs are needed. For React Native 0.87, retain that template's AGP 9
@@ -79,6 +83,40 @@ or notification permission dialogs automatically.
 Avoid also embedding a different copy/version of the native Daively SDK.
 Firebase can coexist; use the same billing identity provider and avoid double
 reporting product events if importing them from Firebase.
+
+## Upgrade from 0.1.2
+
+Install 0.1.3, commit the updated package-manager lockfile, reinstall iOS Pods
+if you build iOS, and rebuild the native application. Android now resolves
+`com.github.Alexander-kuksa:trackhub-android:3.0.9` directly; remove any test-only
+Gradle override that forces 3.0.8. A Metro reload or OTA JavaScript update cannot
+replace the native SDK. Existing JS calls and native module names remain compatible.
+
+Firebase does not automatically supply its app-instance ID to this wrapper.
+Pass it in `firebaseAppInstanceId` at startup or call
+`await Daively.updateFirebaseAppInstanceId(appInstanceId)` when it becomes available.
+Android 3.0.9 persists the supplied ID and sends the late update after the install.
+
+## Payload and callback safety
+
+SDK calls accept plain JSON data. Cycles, accessors, custom objects such as `Date`,
+non-finite numbers, excessive depth and oversized payloads reject before native
+dispatch with a redacted error. Convert custom values before passing them, and
+handle Promise rejections. Both native bridges also check size and depth before
+parsing direct TurboModule calls.
+
+Application callback errors keep their normal behavior by default. To contain
+synchronous exceptions and rejected Promises from SDK event callbacks, configure:
+
+```ts
+Daively.setCallbackErrorHandler(({code, event}) => {
+  reportSdkCallbackFailure({code, event});
+});
+```
+
+Only the error code and event name reach this diagnostic handler. Set the handler
+to `null` to restore normal propagation. This does not install a global crash
+handler or recover fatal native process failures.
 
 ## Start and events
 

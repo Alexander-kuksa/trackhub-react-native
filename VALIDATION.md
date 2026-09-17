@@ -1,8 +1,46 @@
 # Validation — Daively React Native wrapper
 
-## npm packaging release 0.1.2 — 14 September 2026
+## Release 0.1.3 — 17 September 2026
 
-The public package is now `@daively/react-native`. The 0.1.2 release changes
+This release pins Android SDK 3.0.9 and retains iOS SDK 3.1.4. It includes the
+previously prepared bounded JS serializer, native bridge depth/size checks, and
+optional redacted callback error containment. Published Android 3.0.9 is available
+from JitPack; no local native dependency override belongs in the release package.
+
+Verification for this release:
+
+- **38/38 package tests**, TypeScript compilation and real Android/iOS Codegen
+  passed on both **React Native 0.85.3** and **0.87.1** in separate directories.
+- The release tarball was installed in a React Native **0.85.3** / React **19.2.3**
+  host. TypeScript and CLI autolinking passed with exactly one Daively native module.
+- A complete arm64 Android debug APK built with **JDK 17, Gradle 9.3.1,
+  AGP 8.12.0, Kotlin 2.1.20, compile/target SDK 36, minimum SDK 26**.
+  Gradle resolved native **3.0.9 directly from public JitPack**, without a local
+  Maven source or dependency override. The published AAR SHA-256 is
+  `9219ab1c34d8c41ad22fec7257e8ecc8e2e44bcd40c42daeed1fcee12dbe243f`.
+- Android **API 34** runtime smoke passed with reported wrapper **0.1.3** and
+  native SDK **3.0.9**. Checks include native registration, Promise results,
+  nullable snapshots, subscription removal, timeout before startup, separate
+  OpenAI consent, malformed/oversized/deep JSON rejection, quoted-bracket parsing
+  and redacted errors. The smoke test does not start measurement or send ad events.
+- The iOS bridge passed Swift syntax parsing. This release does not claim a new
+  iOS native host build/runtime check; its bridge containment logic was previously
+  built and smoke-tested on RN 0.87.1 with the same published iOS SDK **3.1.4**.
+  No native iOS SDK version was changed.
+
+Rebuild the host application to deliver the new Android native library.
+A JavaScript reload or OTA update is insufficient. Physical-device/store builds,
+Flux AI integration and live paid-ad attribution still require host-app QA.
+The earlier evidence below retains its original versions and dates.
+
+## Package identity release 0.1.2 — 14 September 2026
+
+The package identity is now `@daively/react-native`. Version 0.1.2 is available
+from public npm and GitHub Releases. Anonymous npm metadata and clean registry
+installation were verified on 15 September 2026. The registry and GitHub archives
+are byte-identical and match
+SHA-256 `96fe99287d290637762b3daf3a0ce82b9d99601c5c194ddaf1ee27328e7d5935`.
+Use the npm command in the README, or its GitHub archive alternative. The 0.1.2 release changes
 package identity, examples, developer documentation and reported wrapper version;
 the adapter methods, Codegen module identity and exact native SDK pins are unchanged.
 Remove `@trackhub/react-native` before installing the new package to avoid duplicate
@@ -18,6 +56,15 @@ and verify that CLI autolinking lists only `@daively/react-native` with the
 `TrackHubReactNative` pod and Android module. Use the current examples (which import
 `Daively`) and expect wrapper `0.1.2` after rebuilding the native app. The older
 version-specific evidence and reproduction instructions are retained below.
+
+The first user-authorized npm retry on 15 September restored the expired CLI
+login, then was rejected with HTTP 403 while account 2FA was disabled. After the
+user enabled 2FA and confirmed a fresh browser publication request, npm published
+the original archive at `2026-09-15T09:10:41.843Z`, with `latest` pointing to 0.1.2.
+The package index briefly returned HTTP 404 during propagation; ordinary anonymous
+`npm view` and `npm install` subsequently passed. The clean distribution check used
+`--ignore-scripts --omit=peer --no-audit --no-fund`; it does not claim a new native
+host build or peer-compatibility certification. Tags and release assets were not replaced.
 
 ## React Native 0.85.3 compatibility — 14 September 2026
 
@@ -155,8 +202,8 @@ this initial release. Do not remove this setup step from the README.
 
 ## Scope and release status
 
-- Distribution is a versioned GitHub Release tarball, not an npm registry
-  publication. Follow the exact release URL in the README.
+- The original 0.1.0 distribution was a versioned GitHub Release tarball.
+  Current 0.1.2 is also published to npm; follow the current README.
 - Release/store signing, physical devices, older React Native versions, Expo
   prebuild and static-framework configurations have not been certified.
 - Live Firebase ingestion, billing webhooks, Play referrer attribution,

@@ -15,8 +15,8 @@ export default function SmokeTest() {
     async function run() {
       const native = TurboModuleRegistry.getEnforcing<TestPort>('NativeTrackHub');
       const versions = await Daively.getVersions();
-      const expected = Platform.OS === 'ios' ? '3.1.4' : '3.0.8';
-      if (versions.native !== expected || versions.reactNative !== '0.1.2' || versions.platform !== Platform.OS) {
+      const expected = Platform.OS === 'ios' ? '3.1.4' : '3.0.9';
+      if (versions.native !== expected || versions.reactNative !== '0.1.3' || versions.platform !== Platform.OS) {
         throw new Error('Unexpected native versions');
       }
       const subscription = Daively.onDeferredDeepLink(() => {});
@@ -54,6 +54,8 @@ export default function SmokeTest() {
         ['start', JSON.stringify({sdkKey: secret, debugLogging: 'invalid'}), 'E_TRACKHUB_INPUT'],
         ['trackEvent', JSON.stringify({name: 'smoke', callbackParams: []}), 'E_TRACKHUB_INPUT'],
         ['getVersions', '{invalid JSON', 'E_TRACKHUB_INPUT'],
+        ['getVersions', '{"deep":' + '['.repeat(2000) + '0' + ']'.repeat(2000) + '}', 'E_TRACKHUB_INPUT'],
+        ['getVersions', JSON.stringify({huge: 'x'.repeat(262145)}), 'E_TRACKHUB_INPUT'],
         ['updateOpenAiAdsConsent', JSON.stringify({measurement: 'allow'}), 'E_TRACKHUB_INPUT'],
         ['unknown_smoke_operation', '{}', 'E_TRACKHUB_OPERATION'],
       ]) {
@@ -65,6 +67,8 @@ export default function SmokeTest() {
         }
         if (!rejected) throw new Error('Native input guard did not reject');
       }
+      const quotedBrackets = await native.invoke('getVersions', JSON.stringify({literal: '[{\\"'.repeat(1000)}));
+      if (JSON.parse(quotedBrackets).native !== expected) throw new Error('Quoted brackets must not count as JSON depth');
       if (Platform.OS === 'android' && await Daively.requestAppTrackingTransparency() !== 'unavailable') {
         throw new Error('Android ATT must be unavailable');
       }

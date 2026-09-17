@@ -43,5 +43,5 @@ test('native version reporting and smoke expectation match the wrapper release',
 
 test('React Native compatibility updates keep exact native SDK pins', () => {
   assert.ok(source('TrackHubReactNative.podspec').includes("requirement: {kind: 'exactVersion', version: '3.1.4'}"));
-  assert.ok(source('android/build.gradle').includes("com.github.Alexander-kuksa:trackhub-android:3.0.8"));
+  assert.ok(source('android/build.gradle').includes("com.github.Alexander-kuksa:trackhub-android:3.0.9"));
 });
