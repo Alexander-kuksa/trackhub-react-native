@@ -58,6 +58,8 @@ export interface Attribution {
   touchpointKind: string | null; source: string | null; data: Record<string, string>;
 }
 export interface DeliveryFailure {type: 'credentialsRejected'; path: string}
+/** Redacted diagnostic: contains no event parameters or original exception. */
+export interface CallbackFailure {code: 'E_TRACKHUB_CALLBACK'; event: keyof TrackHubEvents}
 export type TrackingAuthorizationStatus = 'notDetermined' | 'restricted' | 'denied' | 'authorized' | 'unavailable';
 export interface Subscription {remove(): void}
 export interface LinkingSubscription extends Subscription {ready: Promise<void>}

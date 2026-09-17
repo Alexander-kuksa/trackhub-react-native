@@ -25,7 +25,7 @@ class TrackHubModule(context: ReactApplicationContext) : NativeTrackHubSpec(cont
 
     override fun invoke(operation: String, payload: String, promise: Promise) {
         try {
-            require(active.get() && payload.toByteArray(Charsets.UTF_8).size <= 262144)
+            require(active.get() && boundedBridgePayload(payload))
             val p = JSONObject(payload)
             val weak = WeakReference(this)
             when (operation) {
@@ -100,7 +100,7 @@ class TrackHubModule(context: ReactApplicationContext) : NativeTrackHubSpec(cont
                     promise.reject("E_UNSUPPORTED_PLATFORM", "This API is available on iOS only."); return
                 }
                 "getVersions" -> {
-                    promise.resolve(JSONObject().put("reactNative", "0.1.2").put("native", TrackHub.SDK_VERSION).put("platform", "android").toString())
+                    promise.resolve(JSONObject().put("reactNative", "0.1.3").put("native", TrackHub.SDK_VERSION).put("platform", "android").toString())
                     return
                 }
                 else -> { promise.reject("E_TRACKHUB_OPERATION", "Unsupported TrackHub operation."); return }
@@ -111,6 +111,27 @@ class TrackHubModule(context: ReactApplicationContext) : NativeTrackHubSpec(cont
             promise.reject("E_TRACKHUB_INPUT", "Invalid TrackHub request or unavailable native module.")
         }
     }
+}
+
+// Reject recursion bombs before org.json parses them, even for direct calls
+// to the private TurboModule that bypass the TypeScript API.
+private fun boundedBridgePayload(raw: String): Boolean {
+    if (raw.length > 262144 || raw.toByteArray(Charsets.UTF_8).size > 262144) return false
+    var depth = 0
+    var quoted = false
+    var escaped = false
+    for (char in raw) {
+        if (quoted) {
+            if (escaped) escaped = false
+            else if (char == '\\') escaped = true
+            else if (char == '"') quoted = false
+        } else when (char) {
+            '"' -> quoted = true
+            '[', '{' -> { if (++depth > 32) return false }
+            ']', '}' -> { if (--depth < 0) return false }
+        }
+    }
+    return !quoted && depth == 0
 }
 
 private fun JSONObject.text(key: String): String? {

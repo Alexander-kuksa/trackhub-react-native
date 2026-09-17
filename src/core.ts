@@ -1,7 +1,8 @@
 import type {
-  Attribution, EventOptions, GoogleAdsConsent, LinkingSubscription, OpenAiAdsConsent, PiplConsent,
+  Attribution, CallbackFailure, EventOptions, GoogleAdsConsent, LinkingSubscription, OpenAiAdsConsent, PiplConsent,
   SalesPlacement, StartOptions, Subscription, TrackHubConfig, TrackHubEvents, TrackingAuthorizationStatus,
 } from './types';
+import {encodeBoundedJSON as encode} from './bounded-json';
 
 interface NativePort {
   invoke(operation: string, payload: string): Promise<string>;
@@ -29,22 +30,23 @@ function consent(value: object | undefined): void {
     }
   }
 }
-function encode(payload: unknown): string {
-  try {
-    const result = JSON.stringify(payload, (_key, value) => {
-      if (typeof value === 'function' || typeof value === 'symbol' ||
-          (typeof value === 'number' && !Number.isFinite(value))) throw new Error();
-      return value;
-    });
-    if (!result || result.length > 65536) throw new Error();
-    return result;
-  } catch {
-    // Never attach the supplied value: it may contain SDK credentials or IDs.
-    throw new TypeError('TrackHub: payload must be bounded, JSON-serializable data');
+function validEventData(type: keyof TrackHubEvents, value: unknown): boolean {
+  if (type === 'deferredDeepLink') return value === null || typeof value === 'string';
+  if (type === 'erasureCompleted') return typeof value === 'boolean';
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const data = value as Record<string, unknown>;
+  if (type === 'deliveryFailure') return data.type === 'credentialsRejected' && typeof data.path === 'string';
+  if (type === 'attributionChanged') {
+    return ['revision', 'status', 'network', 'channel'].every(key => typeof data[key] === 'string')
+      && ['campaignId', 'adGroupId', 'keywordId', 'touchpointKind', 'source']
+        .every(key => data[key] === null || typeof data[key] === 'string')
+      && !!data.data && typeof data.data === 'object' && !Array.isArray(data.data)
+      && Object.values(data.data).every(item => typeof item === 'string');
   }
+  return false;
 }
-
 export function createTrackHub(getNative: () => NativePort | null, linking: LinkingPort) {
+  let callbackErrorHandler: ((failure: CallbackFailure) => void | Promise<void>) | null = null;
   let erased = false;
   let startup: {signature: string; promise: Promise<void>} | undefined;
   let activeLinking: LinkingSubscription | undefined;
@@ -80,11 +82,22 @@ export function createTrackHub(getNative: () => NativePort | null, linking: Link
     } finally { if (timer !== undefined) clearTimeout(timer); }
   }
   function on<K extends keyof TrackHubEvents>(type: K, handler: (value: TrackHubEvents[K]) => void): Subscription {
-    return native().onEvent(raw => {
+    if (typeof handler !== 'function') throw new TypeError('TrackHub: invalid event handler');
+    let active = true;
+    const subscription = native().onEvent(raw => {
+      if (!active || typeof raw !== 'string' || raw.length > 262144) return;
       let event: {type: K; data: TrackHubEvents[K]};
       try { event = JSON.parse(raw); } catch { return; }
-      if (event && event.type === type) handler(event.data);
+      if (!event || event.type !== type || !validEventData(type, event.data)) return;
+      const reporter = callbackErrorHandler;
+      if (!reporter) {handler(event.data); return;}
+      const report = () => {
+        try {void Promise.resolve(reporter({code: 'E_TRACKHUB_CALLBACK', event: type})).catch(() => {});}
+        catch { /* A failing diagnostic handler must not cause a second failure. */ }
+      };
+      try {void Promise.resolve(handler(event.data)).catch(report);} catch {report();}
     });
+    return {remove() {if (active) {active = false; subscription.remove();}}};
   }
   async function sales(event: string, placement: SalesPlacement | null, options: EventOptions = {}) {
     if (placement !== null && !placements.has(placement)) throw new TypeError('TrackHub: invalid placement');
@@ -158,6 +171,11 @@ export function createTrackHub(getNative: () => NativePort | null, linking: Link
     return owned;
   }
   return {
+    /** Opt in to callback isolation; null restores normal exception propagation. */
+    setCallbackErrorHandler(handler: ((failure: CallbackFailure) => void | Promise<void>) | null): void {
+      if (handler !== null && typeof handler !== 'function') throw new TypeError('TrackHub: invalid callback error handler');
+      callbackErrorHandler = handler;
+    },
     async start(config: TrackHubConfig, options: StartOptions = {}): Promise<void> {
       assertMeasuring();
       requireString(config.sdkKey, 'SDK Key', 8192);

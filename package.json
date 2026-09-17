@@ -1,6 +1,6 @@
 {
   "name": "@daively/react-native",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Daively attribution, engagement and billing context for React Native",
   "publishConfig": {"access": "public", "registry": "https://registry.npmjs.org/"},
   "license": "MIT",
