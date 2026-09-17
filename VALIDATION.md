@@ -2,6 +2,12 @@
 
 ## Release 0.1.3 — 17 September 2026
 
+GitHub release/tag 0.1.3 is published. Anonymous installation of its final archive
+passed with the exact tested integrity. npm publication is pending account
+reauthentication after the previous CLI session returned HTTP 401; use the GitHub
+installation in the current README. The tagged archive is not being replaced.
+Archive SHA-256: `bb065471a2bd3b584667b6a5e432397c0131ce9cb1c6a0f1130e6df7bcda06b6`.
+
 This release pins Android SDK 3.0.9 and retains iOS SDK 3.1.4. It includes the
 previously prepared bounded JS serializer, native bridge depth/size checks, and
 optional redacted callback error containment. Published Android 3.0.9 is available
