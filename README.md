@@ -21,18 +21,19 @@ platforms. The exact iOS SDK dependency remains 3.1.4.
 
 ## Install
 
-Version **0.1.3 is published on GitHub**. npm publication is pending account
-reauthentication; the npm registry still has 0.1.2. Install the verified archive
-from [GitHub Releases](https://github.com/Alexander-kuksa/trackhub-react-native/releases/tag/0.1.3):
-
-```sh
-npm install --save-exact https://github.com/Alexander-kuksa/trackhub-react-native/releases/download/0.1.3/daively-react-native-0.1.3.tgz
-```
-
-After npm publication is confirmed, the equivalent registry command will be:
+Install the exact public npm package
+[@daively/react-native 0.1.3](https://www.npmjs.com/package/@daively/react-native/v/0.1.3).
+Anonymous registry installation was verified on 18 September 2026; `latest` is 0.1.3.
 
 ```sh
 npm install --save-exact @daively/react-native@0.1.3
+```
+
+The byte-identical archive is also available on
+[GitHub Releases](https://github.com/Alexander-kuksa/trackhub-react-native/releases/tag/0.1.3):
+
+```sh
+npm install --save-exact https://github.com/Alexander-kuksa/trackhub-react-native/releases/download/0.1.3/daively-react-native-0.1.3.tgz
 ```
 
 ### Upgrade from the earlier package
@@ -42,7 +43,7 @@ same native module, then install the new name and update all JS/TS imports:
 
 ```sh
 npm uninstall @trackhub/react-native
-npm install --save-exact https://github.com/Alexander-kuksa/trackhub-react-native/releases/download/0.1.3/daively-react-native-0.1.3.tgz
+npm install --save-exact @daively/react-native@0.1.3
 ```
 
 Use `import Daively from '@daively/react-native'`. The default import name is

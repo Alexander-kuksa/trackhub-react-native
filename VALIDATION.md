@@ -2,10 +2,13 @@
 
 ## Release 0.1.3 — 17 September 2026
 
-GitHub release/tag 0.1.3 is published. Anonymous installation of its final archive
-passed with the exact tested integrity. npm publication is pending account
-reauthentication after the previous CLI session returned HTTP 401; use the GitHub
-installation in the current README. The tagged archive is not being replaced.
+GitHub release/tag 0.1.3 is published. The same archive was published to npm on
+**18 September 2026 at 09:56:47.306 UTC**, after the user restored CLI access and
+confirmed npm's separate publication authentication. Public metadata reports
+version 0.1.3 and `latest: 0.1.3`. Anonymous registry installation passed in an
+empty consumer with a fresh cache and empty user/global npm configuration;
+installed native pins and the exact tested integrity were verified. The downloaded
+npm archive is byte-identical to the GitHub release. Tags and assets were not replaced.
 Archive SHA-256: `bb065471a2bd3b584667b6a5e432397c0131ce9cb1c6a0f1130e6df7bcda06b6`.
 
 This release pins Android SDK 3.0.9 and retains iOS SDK 3.1.4. It includes the
